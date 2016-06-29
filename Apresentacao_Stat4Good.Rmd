@@ -1,6 +1,7 @@
 ---
 title: "Apresentacao_stat4good"
 output: pdf_document
+author: Fernando de Souza Bastos
 ---
 
 ```{r setup, include=FALSE}
