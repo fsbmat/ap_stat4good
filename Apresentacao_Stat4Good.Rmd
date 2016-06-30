@@ -1,5 +1,5 @@
 ---
-title: "Apresentacao_stat4good"
+title: "Introdução a Estimação e Modelagem no R com o Uso da Distribuição Birnbaum-Saunders"
 output: pdf_document
 author: Fernando de Souza Bastos
 ---
@@ -8,28 +8,16 @@ author: Fernando de Souza Bastos
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Introdução
+# Introdução
 
-<p style="text-align: justify;">
-Foi desenvolvido no artigo "A new family of life distributions" por 
-Birnbaum e Saunders a distribuição que ora apresento. A mesma modela o 
-tempo de vida de materiais
-e equipamentos sujeitos a cargas dinâmicas através de modelos de dano 
-acumulado e tem sido amplamente utilizada na área de engenharia, na 
-indústria, em negócios, na análise de confiabilidade, na análise de 
-sobrevivência, em ciências ambientais e ciências médicas e em diversas 
-outras áreas, pois possui propriedades
-interessantes e uma relação próxima com a distribuição normal, o que a 
-torna, do ponto de vista de aplicação, uma alternativa mais atraente 
-para as bem conhecidas distribuições Weibull, log-logística, 
-log-normal, gama e modelos inversos Gaussianos.
-</p>
+Neste post é utilizada a distribuição Birnbaum-Saunders para ilustrar alguns conceitos de métodos computacionais em Inferência Estatística.  Essa distribuição foi proposta por Birnbaum e Saunders (1969), no artigo intitulado __A new family of life distributions__ e é, comumente, considerado na modelagem de tempo de vida de materiais e equipamentos sujeitos a cargas dinâmicas através de modelos de dano acumulado. Sendo, amplamente, utilizada na área de engenharia, na indústria, em negócios, na análise de confiabilidade, na análise de sobrevivência, em ciências ambientais e ciências médicas e em diversas outras áreas, pois possui propriedades interessantes e uma relação próxima com a distribuição normal, o que a torna, do ponto de vista de aplicação, uma alternativa mais atraente para as bem conhecidas distribuições Weibull, log-logística, log-normal, gama e modelos inversos Gaussianos. 
+
+Além do contexto inferencial, é discutido algumas observações sobre questões numéricas quando trabalha-se com a função de verossimilhança na perspectiva computacional fazendo uso do software `R`. 
+
 
 ##Função de Distribuição Acumulada Birnbaum-Saunders 
 
-
-Suponha que $T$ seja uma variável aleatória que representa o tempo total até que ocorra a falha, então a distribuição de $T$ proposta
-por Birnbaum e Saunders (1969a) tem função de distribuição acumulada (fda) dada por:
+Seja $T$ uma variável aleatória representando o tempo até a ocorrência do evento de interesse, então assumindo que essa variável segue a distribuição Birnbaum-Saunders, tem-se que a sua função de distribuição acumulada (f.d.a.) é dada por:
 
 \begin{equation}\label{fun1}
 F_{T}(t;\alpha,\beta)=P(T\leq t)=\Phi\left[\dfrac{1}{\alpha}\left(\sqrt{\frac{t}{\beta}}-\sqrt{\frac{\beta}{t}}\right)\right],\ t>0
@@ -78,7 +66,7 @@ integrate(integrand, lower = 0, upper = Inf)
 Note que com a mudança de alpha, mantendo beta fixo, há uma alteração na assimetria do gráfico, veja os gráficos da distribuição acumulada e da densidade:
 </p>
 
-```{r, fig.align='center'}
+```{r, fig.align='center',fig.cap='Função de Distribuição Acumulada'}
 t=seq(0,3,by=0.01)
 plot(t,acbs(t,0.1,1),main='T ~ Birnbaum-Saunders(shape, scale=1)',ylab='F(T<=t)',type='l')
 lines(t,acbs(t,0.3,1),col=2,lty=2, lwd=1)
@@ -91,7 +79,7 @@ legend(2.3, 0.55, c("BS(t,0.1,1)","BS(t,0.3,1)","BS(t,0.5,1)","BS(t,0.75,1)","BS
 
 ```
 
-```{r, fig.align='center'}
+```{r, fig.align='center',fig.cap='Função Densidade'}
 #
 t=seq(0,3,by=0.01)
 plot(t,bs(t,0.1,1),main='T ~ Birnbaum-Saunders(shape, scale=1)',ylab='Densidade',type='l')
@@ -108,7 +96,7 @@ legend(2.3, 4, c("BS(t,0.1,1)","BS(t,0.3,1)","BS(t,0.5,1)","BS(t,0.75,1)","BS(t,
 Enquanto que ao manter alpha fixo e mudar o beta há uma mudança na média e na variança da variável aleatória.
 </p>
 
-```{r, fig.align='center', fig.width=6.5}
+```{r, fig.align='center', fig.width=6.5,fig.cap='Distribuição Acumulada'}
 
 t=seq(0.2,3.5,by=0.01)
 plot(t,acbs(t,0.1,0.5),main='T~Birnbaum-Saunders(shape=0.1,scale)',ylab='F(T<=t)',type='l')
@@ -121,7 +109,7 @@ legend(2.55, 0.55, c("BS(t,0.1,0.5)","BS(t,0.1,0.75)","BS(t,0.1,1)","BS(t,0.1,1.
                      "BS(t,0.1,2)","BS(t,0.1,2.5)"), fill=1:6)
 ```
 
-```{r, fig.align='center', fig.width=6.5}
+```{r, fig.align='center', fig.width=6.5,fig.cap='Função Densidade'}
 t=seq(0,3,by=0.01)
 plot(t,bs(t,0.1,0.5),main='T~Birnbaum-Saunders(shape=0.1,scale)',ylab='Densidade',type='l')
 lines(t,bs(t,0.1,0.75),col=2,lty=2, lwd=1)
@@ -157,7 +145,7 @@ $$\mu_{3}=\dfrac{16\alpha^{2}(11\alpha^{2}+6)}{(5\alpha^{2}+4)^{3}},\ \mu_{4}=3+
 
 #A Função de Verossimilhança
 
-Se $T_{1},\cdots,T_{n}$ é uma amostra de n observações independentes da distribuição $BS(\alpha,\beta).$
+Seja $T_{1},\ldots, T_{n}$ uma amostra aleatória de tamanho $n$ da distribuição $BS\left(\alpha,\beta\right)$.
 Então, o logaritmo da função de verossimilhança para $\theta=(\alpha,\beta)$, possui a seguinte forma:
 $$
 l(\theta)=-\dfrac{3}{2}\sum_{i=1}^{n}\log{(t_{i})}-n\log{(2\alpha)}-\dfrac{n}{2}\log{(2\pi)\beta}-\dfrac{1}{2\alpha^{2}}\sum_{i=1}^{n}\left(\dfrac{t_{i}}{\beta}+\dfrac{\beta}{t_{i}}-2\right)+\sum_{i=1}^{n}(t_{i}+\beta)$$
@@ -177,7 +165,7 @@ $$
 Antes de apresentar a simulação de Monte Carlo para estimação dos parâmetros veja o gráfico da função log de verossimilhança:
 </p>
 
-```{r, fig.align='center', fig.height=4, fig.width=7, message=FALSE, warning=FALSE}
+```{r, fig.align='center', fig.height=4, fig.width=7, message=FALSE, warning=FALSE, fig.cap='Função de Velhossimilhança'}
 ########################################
 require(plot3D)
 alpha=2
@@ -197,30 +185,43 @@ f<-function(alpha,beta){
 
 f <- Vectorize(f)
 z <- outer(alpha,beta, f)
+```
+
+```{r, fig.align='center', fig.height=4, fig.width=7, message=FALSE, warning=FALSE, fig.cap='Função de Velhossimilhança'}
 persp3D(x=alpha, y=beta, z=z, contour=TRUE, facets=TRUE, curtain=F, phi=30,theta=0)
+```
+
+```{r, fig.align='center', fig.height=4, fig.width=7, message=FALSE, warning=FALSE, fig.cap='Histograma da Função de Velhossimilhança'}
 hist3D(x=alpha, y=beta, z=z, contour=TRUE, facets=TRUE, curtain=F, phi=-30,theta=30)
+```
+
+```{r, fig.align='center', fig.height=4, fig.width=7, message=FALSE, warning=FALSE, fig.cap='Grágico de Contorno da Função de Velhossimilhança'}
 contour(x=alpha, y=beta, z=z,levels = pretty(c(-1780,-2000),20))
 points(x=c(2,1),pch=19)
 
 ########################################
 ```
 
-
-
 #Simulação de Monte Carlo
 
 <p style="text-align: justify;">
-O método de Monte Carlo é um método de simulação estatística que utiliza sequencias de números aleatórios para desenvolver simulações. Em outras palavras, é visto como método numérico universal para resolver problemas por meio de amostragem aleatória.
+O método de Monte Carlo é um método de simulação estatística que utiliza 
+sequencias de números aleatórios para desenvolver simulações. Em outras 
+palavras, é visto como método numérico universal para resolver problemas por 
+meio de amostragem aleatória.
 </p>
 
 ##Possíveis problemas na estimação dos parâmetros
 
 <p style="text-align: justify;">
-Alguns problemas que tive na implementação da verossimilhança e que merecem destaque:
+Alguns problemas que tive na implementação da verossimilhança e que merecem 
+destaque:
 </p>
 
 <p style="text-align: justify;">
-Veja que apesar de `0.3-0.1=0.2` o R diz que isso não é verdade. Isso ocorre porque nesta diferença o R arredonda o resultado, veja abaixo que se aumentamos o número de dígitos a saída é um número próximo mas diferente de 2.
+Veja que apesar de `0.3-0.1=0.2` o R diz que isso não é verdade. Isso ocorre 
+porque nesta diferença o R arredonda o resultado, veja abaixo que se aumentamos 
+o número de dígitos a saída é um número próximo mas diferente de 2.
 </p>
 
 ```{r}
@@ -260,7 +261,7 @@ Outra forma é caso na simulação apareça números negativos no argumento do l
 Vejamos como gerar valores aleatório com distribuição Birnbaum-Saunders e a estimação de alpha e beta usando uma simulação de Monte Carlo e as funções optim e nlimb.
 </p>
 
-```{r, fig.align='center', fig.height=3, fig.width=7}
+```{r}
 
 #geração de valores de uma distribuição Birnbaum-Saunders(alpha,beta)
 
@@ -337,7 +338,9 @@ tab1=data.frame(truevalue,mean=mest1,sd=dest1,eqm=eqmest1)
 
 tab
 tab1
+```
 
+```{r, fig.align='center', fig.height=3, fig.width=7, fig.cap='Histograma das estimativas dos parâmetros'}
 par(mfrow=c(1,2))
 hist(m[,1],prob=T);
 rug(m[,1])
@@ -345,6 +348,10 @@ curve(expr = dnorm(x,mean=mean(m[,1]),sd=sd(m[,1])),add=T, col="red")
 hist(m[,2],prob=T);
 rug(m[,2])
 curve(expr = dnorm(x,mean=mean(m[,2]),sd=sd(m[,2])),add=T, col="red")
+```
+
+```{r, fig.align='center', fig.height=3, fig.width=7, fig.cap='Histograma das estimativas dos parâmetros'}
+par(mfrow=c(1,2))
 hist(m1[,1],prob=T);
 rug(m1[,1])
 curve(expr = dnorm(x,mean=mean(m1[,1]),sd=sd(m1[,1])),add=T, col="red")
@@ -404,7 +411,7 @@ Note que com a mudança de mu, mantendo phi fixo, há uma alteração na curtose
 aleatória e com o aumento de beta há um aumento da assimetria e uma diminuição da variância do gráfico.
 </p>
 
-```{r, fig.align='center'}
+```{r, fig.align='center',fig.cap='Função Densidade'}
 #
 t=seq(0.5,6,by=0.01)
 plot(t,bs(t,1,100),main='T ~ Birnbaum-Saunders(mu, phi=100)',ylab='Densidade',type='l')
@@ -415,8 +422,9 @@ lines(t,bs(t,3,100),col=5,lty=5, lwd=3)
 lines(t,bs(t,3.5,100),col=6,lty=6, lwd=2)
 legend(4.3, 2.7, c("BS(t,1,100)","BS(t,1.5,100)","BS(t,2,100)","BS(t,2.5,100)",
                    "BS(t,3,100)","BS(t,3.5,100)"), fill=1:6)
+```
 
-
+```{r, fig.align='center',fig.cap='Função Densidade'}
 t=seq(0,4,by=0.01)
 plot(t,bs(t,1,2),ylim=c(0,2.8),main='T~Birnbaum-Saunders(mu=1, phi)',ylab='Densidade',type='l')
 lines(t,bs(t,1,5),col=2,lty=2, lwd=1)
@@ -433,7 +441,7 @@ legend(2.5, 2.5,
 Ao manter mu fixo e aumentar phi a variância de T (Var(T)) tende a zero.
 </p>
 
-```{r, fig.align='center'}
+```{r, fig.align='center',fig.cap="Variância de T"}
 V=function(mu,phi){
   vt=2*(mu^2)*(2*phi+5)/((phi+1)^2)
   return(vt)
@@ -458,7 +466,9 @@ $$l(\mu,\phi;\textbf{T})=\dfrac{n\phi}{2}+\dfrac{n}{2}\log{(\phi+1)}-\dfrac{3}{2
 
 Os estimadores (ou estimativas) de máxima verossimilhança de $\mu$ e $\phi$ são obtidos maximizando essa função, a partir da solução das equações formadas com as derivadas parciais em relação $\mu$ e $\phi.$ É possível mostrar que não é possível obter uma solução analítica para os estimadores de máxima verossimilhança e, portanto, métodos iterativos de otimização são utilizados.
 
-#Modelo de regressão Birnbaum-Saunders para $\mu$
+#Modelos de Regressão Birnbaum-Saunders
+
+##Modelo de regressão Birnbaum-Saunders para $\mu$
 
 <p style="text-align: justify;">
 Criou-se agora uma estrutura de regressão para a média da distribuição $BS(\alpha,\beta)$ fazendo $g(\mu)=\beta_{0}+\beta_{1}*X$
@@ -556,14 +566,21 @@ tab1=data.frame(truevalue,mean=mest1,sd=dest1,eqm=eqmest1)
 
 tab
 tab1
+```
 
-par(mfrow=c(2,2))
+
+```{r, fig.align='center', fig.height=3, fig.width=7, fig.cap='Histograma das estimativas dos parâmetros'}
+par(mfrow=c(1,2))
 hist(m[,1],prob=T);
 rug(m[,1])
 curve(expr = dnorm(x,mean=mean(m[,1]),sd=sd(m[,1])),add=T, col="red")
 hist(m[,2],prob=T);
 rug(m[,2])
 curve(expr = dnorm(x,mean=mean(m[,2]),sd=sd(m[,2])),add=T, col="red")
+```
+
+```{r, fig.align='center', fig.height=3, fig.width=7, fig.cap='Histograma das estimativas dos parâmetros'}
+par(mfrow=c(1,2))
 hist(m1[,1],prob=T);
 rug(m1[,1])
 curve(expr = dnorm(x,mean=mean(m1[,1]),sd=sd(m1[,1])),add=T, col="red")
@@ -573,11 +590,11 @@ curve(expr = dnorm(x,mean=mean(m1[,2]),sd=sd(m1[,2])),add=T, col="red")
 
 ```
 
-#Modelo de regressão Birnbaum-Saunders para $\mu$ e $\phi$
+##Modelo de regressão Birnbaum-Saunders para $\mu$ e $\phi$
 
 Agora, vamos criar uma estrutura de regressão para $\mu$ e $\phi,$ de tal forma que $g(\mu)=\beta_{0}+\beta_{1}X$ e $h(\phi)=\alpha_{0}+\alpha_{1}Z$
 
-```{r}
+```{r, fig.align='center', fig.cap='Histograma das estimativas dos parâmetros'}
 N=100
 #m e m1 são as matrizes que receberão as estimativas no final do processo de 
 #estimação
@@ -684,9 +701,7 @@ tab1=data.frame(truevalue,mean=mest1,sd=dest1,eqm=eqmest1)
 
 tab
 tab1
-```
 
-```{r, fig.align='center'}
 par(mfrow=c(2,2))
 hist(m[,1],prob=T);
 rug(m[,1])
@@ -702,7 +717,7 @@ rug(m[,4])
 curve(expr = dnorm(x,mean=mean(m[,4]),sd=sd(m[,4])),add=T, col="red")
 ```
 
-```{r, fig.align='center'}
+```{r, fig.align='center', fig.cap='Histograma das estimativas dos parâmetros'}
 par(mfrow=c(2,2))
 hist(m1[,1],prob=T);
 rug(m1[,1])
