@@ -25,10 +25,12 @@ para as bem conhecidas distribuições Weibull, log-logística,
 log-normal, gama e modelos inversos Gaussianos.
 </p>
 
-##Função de Distribuição Acumulada Birnbaum-Saunders
+##Função de Distribuição Acumulada Birnbaum-Saunders 
+
 
 Suponha que $T$ seja uma variável aleatória que representa o tempo total até que ocorra a falha, então a distribuição de $T$ proposta
 por Birnbaum e Saunders (1969a) tem função de distribuição acumulada (fda) dada por:
+
 \begin{equation}\label{fun1}
 F_{T}(t;\alpha,\beta)=P(T\leq t)=\Phi\left[\dfrac{1}{\alpha}\left(\sqrt{\frac{t}{\beta}}-\sqrt{\frac{\beta}{t}}\right)\right],\ t>0
 \end{equation}
@@ -37,7 +39,7 @@ com parâmetros de forma $\alpha>0$ e de escala $\beta>0$, que é usualmente den
 
 ##Função Densidade
 
-Considerando a distribuição acumulada da variável aleatória $T$ dada em $(\ref{fun1}),$ a sua correspondente
+Considerando a distribuição acumulada da variável aleatória $T$ dada em $(\ref{fun1})$ a sua correspondente
 função densidade de probabilidade (fdp) é dada por
 \begin{equation}\label{fun2}
 f_{T}(t)=\dfrac{t^{-\frac{3}{2}}(t+\beta)}{2\sqrt{2\pi}\alpha\sqrt{\beta}}\exp\left[-\frac{1}{2\alpha^{2}}\left(\frac{t}{\beta}+\frac{\beta}{t}-2\right)\right]
@@ -134,16 +136,16 @@ legend(2, 8, c("BS(t,0.1,0.5)","BS(t,0.1,0.75)","BS(t,0.1,1)","BS(t,0.1,1.5)",
 
 ##Observações:
 
-\begin{itemize}
-\item A função de distribuição acumulada da $BS(\alpha,\beta)$ é identificável.
-\item $F_{T}(\beta)=0.5,$ ou seja, $\beta$ é a mediana da $BS(\alpha,\beta)$
-\item Se $T\sim BS(\alpha,\beta),$ então $$a>0,\ aT\sim BS(\alpha,a\beta)\ \textrm{e}\ T^{-1}\sim BS(\alpha,\beta^{-1})$$
-\item A partir da FDA, fazendo $Z=\dfrac{1}{\alpha}\left(\sqrt{\frac{t}{\beta}}-\sqrt{\frac{\beta}{t}}\right)$ temos: 
+
+* A função de distribuição acumulada da $BS(\alpha,\beta)$ é identificável.
+* $F_{T}(\beta)=0.5,$ ou seja, $\beta$ é a mediana da $BS(\alpha,\beta)$
+* Se $T\sim BS(\alpha,\beta),$ então $$a>0,\ aT\sim BS(\alpha,a\beta)\ \textrm{e}\ T^{-1}\sim BS(\alpha,\beta^{-1})$$
+* A partir da FDA, fazendo $Z=\dfrac{1}{\alpha}\left(\sqrt{\frac{t}{\beta}}-\sqrt{\frac{\beta}{t}}\right)$ temos: 
 \begin{equation}\label{fun3}
 T=\dfrac{\beta}{4}\left[\alpha Z +\sqrt{(\alpha Z)^2+4}\right]^{2}
 \end{equation}
 Essa relação é extremamente útil e pode ser usada para obtenção de números pseudo-aleatórios.
-\end{itemize}
+
 
 a média, a variância, o coeficiente de variação e os coeficientes de assimetria $(\mu_{3})$ e curtose $(\mu_{4})$ da distribuição BS são, respectivamente:
 
@@ -153,14 +155,14 @@ $$CV(T)=\dfrac{\sqrt{5\alpha^{4}+4\alpha^{2}}}{\alpha^{2}+2}$$
 
 $$\mu_{3}=\dfrac{16\alpha^{2}(11\alpha^{2}+6)}{(5\alpha^{2}+4)^{3}},\ \mu_{4}=3+\dfrac{6\alpha^{2}(93\alpha^{2}+41)}{5+\alpha^{2}+4}$$
 
-##A Função de Verossimilhança
+#A Função de Verossimilhança
 
 Se $T_{1},\cdots,T_{n}$ é uma amostra de n observações independentes da distribuição $BS(\alpha,\beta).$
 Então, o logaritmo da função de verossimilhança para $\theta=(\alpha,\beta)$, possui a seguinte forma:
 $$
 l(\theta)=-\dfrac{3}{2}\sum_{i=1}^{n}\log{(t_{i})}-n\log{(2\alpha)}-\dfrac{n}{2}\log{(2\pi)\beta}-\dfrac{1}{2\alpha^{2}}\sum_{i=1}^{n}\left(\dfrac{t_{i}}{\beta}+\dfrac{\beta}{t_{i}}-2\right)+\sum_{i=1}^{n}(t_{i}+\beta)$$
 
-###Estimadores de Máxima Verossimilhança
+##Estimadores de Máxima Verossimilhança
 
 Os estimadores de máxima verossimilhança (EMV) de $\alpha$ e $\beta$ são obtidos maximizando $l(\theta)$ a partir das soluções das equações:
 $$
@@ -205,7 +207,7 @@ points(x=c(2,1),pch=19)
 
 
 
-##Simulação de Monte Carlo
+#Simulação de Monte Carlo
 
 <p style="text-align: justify;">
 O método de Monte Carlo é um método de simulação estatística que utiliza sequencias de números aleatórios para desenvolver simulações. Em outras palavras, é visto como método numérico universal para resolver problemas por meio de amostragem aleatória.
@@ -246,7 +248,7 @@ Para contornar esse problema, podemos fazer o seguinte truque:
 No exemplo específico da Birnbaum-Saunders ao definir a função log de verossimilhança mude alpha e beta para exp(lalpha) e exp(lbeta), respectivamente, onde lalpha=log(alpha) e lbeta=log(beta). Ao fazer esta mudança não altera-se em nada a função pois a substituição usa exp(log(alpha))=alpha e exp(log(beta))=beta, isso é um macete para o R não ter que calcular log de números maiores que o maior valor possível (~exp(709)).
 </p>
 <p style="text-align: justify;">
-Outra forma de resolver, caso o método de otimização funcione, mas aparece alguns valores NA, é manter alpha e beta e acrescentar na função optim o comando abaixo: 
+Outra forma de resolver, caso o método de otimização funcione, mas aparece alguns 'Warnings' com valores NA, é manter alpha e beta e acrescentar na função optim o comando abaixo: 
 </p>
 `1-suppressWarnings(optim(start,fn=Loglik,method="BFGS",hessian=T)$par)`
 <p style="text-align: justify;">
@@ -352,7 +354,7 @@ curve(expr = dnorm(x,mean=mean(m1[,2]),sd=sd(m1[,2])),add=T, col="red")
 
 ```
 
-##Uma Reparametrização Importante
+#Uma Reparametrização Importante
 
 As vezes, reparametrizações são essenciais, pois facilitam o desenvolvimento analítico de algumas distribuições e também podem melhorar
 a eficiência em simulações, em determinadas situações, como em regressão, quando a distribuição da variável resposta não possui a média como um de seus
@@ -398,20 +400,21 @@ integrate(integrand, lower = 0, upper = Inf)
 ```
 
 <p style="text-align: justify;">
-Note que com a mudança de mu, mantendo phi fixo, há uma alteração curtose da variável aleatória e com o aumento de beta há um aumento da média e da variança, ou seja, mudamos a assimetria do gráfico.
+Note que com a mudança de mu, mantendo phi fixo, há uma alteração na curtose da variável 
+aleatória e com o aumento de beta há um aumento da assimetria e uma diminuição da variância do gráfico.
 </p>
 
 ```{r, fig.align='center'}
 #
 t=seq(0.5,6,by=0.01)
-plot(t,bs(t,1,100),main='T ~ Birnbaum-Saunders(mu, phi=1)',ylab='Densidade',type='l')
+plot(t,bs(t,1,100),main='T ~ Birnbaum-Saunders(mu, phi=100)',ylab='Densidade',type='l')
 lines(t,bs(t,1.5,100),col=2,lty=2, lwd=1)
 lines(t,bs(t,2,100),col=3,lty=3, lwd=2)
 lines(t,bs(t,2.5,100),col=4,lty=4, lwd=3)
 lines(t,bs(t,3,100),col=5,lty=5, lwd=3)
 lines(t,bs(t,3.5,100),col=6,lty=6, lwd=2)
 legend(4.3, 2.7, c("BS(t,1,100)","BS(t,1.5,100)","BS(t,2,100)","BS(t,2.5,100)",
-                   "BS(t,3,100)","BS(t,3.5,1)"), fill=1:6)
+                   "BS(t,3,100)","BS(t,3.5,100)"), fill=1:6)
 
 
 t=seq(0,4,by=0.01)
@@ -454,6 +457,8 @@ legend(60, 2.5, c("Var(T;0.6,phi)","Var(T;1,phi)","Var(T;1.5,phi)",
 $$l(\mu,\phi;\textbf{T})=\dfrac{n\phi}{2}+\dfrac{n}{2}\log{(\phi+1)}-\dfrac{3}{2}\sum_{i=1}^{n}\log{t_{i}}-n\log{(4\sqrt{\pi\mu})}+\sum_{i=1}^{n}\log{\left[t_{i}+\dfrac{\phi\mu}{\phi+1}\right]}-\dfrac{\phi}{4}\sum_{i=1}^{n}\left[\dfrac{t_{i}(\phi+1)}{\phi\mu}+\dfrac{\phi\mu}{t_{i}(\phi+1)}\right]$$
 
 Os estimadores (ou estimativas) de máxima verossimilhança de $\mu$ e $\phi$ são obtidos maximizando essa função, a partir da solução das equações formadas com as derivadas parciais em relação $\mu$ e $\phi.$ É possível mostrar que não é possível obter uma solução analítica para os estimadores de máxima verossimilhança e, portanto, métodos iterativos de otimização são utilizados.
+
+#Modelo de regressão Birnbaum-Saunders para $\mu$
 
 <p style="text-align: justify;">
 Criou-se agora uma estrutura de regressão para a média da distribuição $BS(\alpha,\beta)$ fazendo $g(\mu)=\beta_{0}+\beta_{1}*X$
@@ -504,8 +509,8 @@ Loglik<-function(beta,dados){
  p=ncol(X)
  mu=exp(X%*%beta[1:p])
  phi=phi
- lv=sum((phi/2)-(3/2)*log(t)+(1/2)*log(phi+1)-log(4*sqrt(pi*mu))+log(t+(phi*mu/(phi+1)))-
-          (phi/4)*((t*(phi+1)/(phi*mu))+(phi*mu/(t*(phi+1)))))
+ lv=sum((phi/2)-(3/2)*log(t)+(1/2)*log(phi+1)-log(4*sqrt(pi*mu))+log(t+(phi*mu/(phi+1)))
+        -(phi/4)*((t*(phi+1)/(phi*mu))+(phi*mu/(t*(phi+1)))))
 return(-lv)
 }
 #Chute inicial para as funções de estimação
@@ -568,12 +573,177 @@ curve(expr = dnorm(x,mean=mean(m1[,2]),sd=sd(m1[,2])),add=T, col="red")
 
 ```
 
+#Modelo de regressão Birnbaum-Saunders para $\mu$ e $\phi$
+
+Agora, vamos criar uma estrutura de regressão para $\mu$ e $\phi,$ de tal forma que $g(\mu)=\beta_{0}+\beta_{1}X$ e $h(\phi)=\alpha_{0}+\alpha_{1}Z$
+
+```{r}
+N=100
+#m e m1 são as matrizes que receberão as estimativas no final do processo de 
+#estimação
+m=matrix(ncol=4,nrow=N)
+m1=matrix(ncol=4,nrow=N)
+#Valores iniciais dos parâmetros usados para gerar t
+#Ou seja, Valor verdadeiro dos parâmetros
+beta0=2
+beta1=-1
+alpha0=3
+alpha1=1
+truevalue=c(beta0,beta1,alpha0,alpha1)
+#Tamanho das amostras
+n=100
+#Vetor de parâmetros
+beta=matrix(c(beta0,beta1),nrow=2,ncol=1)
+alpha=matrix(c(alpha0,alpha1),nrow=2,ncol=1)
+#Vetor de 1's
+const1 <- rep(1,n);
+const <- cbind(const1);
+#Vetor de cováriavel com distribuição unif(0,1)
+X1=matrix(runif(n, 0, 1),nrow=n,ncol=1)
+Z1=matrix(runif(n, 0, 1),nrow=n,ncol=1)
+#Matrizes de covariáveis
+X <-matrix(c(const,X1),nrow=n,ncol=ncol(X1)+1)
+Z <-matrix(c(const,Z1),nrow=n,ncol=ncol(Z1)+1)
+#Número de colunas de X e Z
+p=ncol(X)
+q=ncol(Z)
+#Vetor de médias
+mu=exp(X%*%beta)
+#Vetor de dispersão
+phi=exp(Z%*%alpha)
+
+remove(beta,beta0,beta1,alpha,alpha0,alpha1)
+#Monte Carlo para estimação dos parâmetros beta0, beta1 e beta2
+
+for (i in 1:N){
+  
+  z<-cbind(rnorm(n,0,1))
+  t<-((phi*mu)/(phi+1))*((z/sqrt(2*phi))+(sqrt((z/sqrt(2*phi))^2+1)))^2
+  
+  
+  #Um motivo de erro comum na função abaixo é esquecer o parentêses dentro do colchete
+  #de theta[(p+1):(p+q)]  
+  Loglik<-function(theta,dados){
+    p=ncol(X)
+    q=ncol(Z)
+    beta=theta[1:p]
+    alpha=theta[(p+1):(p+q)]
+    mu=exp(X%*%beta)
+    phi=exp(Z%*%alpha)
+    lv=sum((phi/2)-(3/2)*log(t)+(1/2)*log(phi+1)-log(4*sqrt(pi*mu))+log(t+(phi*mu/(phi+1)))
+           -(phi/4)*((t*(phi+1)/(phi*mu))+(phi*mu/(t*(phi+1)))))
+    return(-lv)
+  }
+  #Chute inicial para as funções de estimação
+  start=cbind(5,3,1,-1)
+  
+  #alpha=c(1,2)
+  #beta=c(2,1)
+  
+  #Estimation with function optim
+  bs_op=optim(start,Loglik,method="BFGS",dados=t,hessian = T) 
+  m[i,]=bs_op$par
+  bs_nl=nlminb(start, Loglik,dados=t)
+  m1[i,]=bs_nl$par
+}
+mest=colMeans(m)
+mest1=colMeans(m1)
+
+#calculating the standard deviation of each column of the array of parameters m
+dest=apply(m,2,sd)
+dest1=apply(m1,2,sd)
+
+#root mean square error in the calculation of each column of the array of parameters m
+#in relation to the true value of the parameter
+eqm=function(x,bs_op){ 
+  k=length(x)
+  sqrt(sum(((x-bs_op)^2))/k)}
+
+eqm1=function(x,bs_nl){ 
+  k=length(x)
+  sqrt(sum(((x-bs_nl)^2))/k)}
+
+#Estimated mean squared error of each parameter 
+
+eqmest=c(eqm(x=m[,1],bs_op=truevalue[1]),
+         eqm(x=m[,2],bs_op=truevalue[2]),
+         eqm(x=m[,3],bs_op=truevalue[3]),
+         eqm(x=m[,4],bs_op=truevalue[4]))
+
+#Estimated mean squared error of each parameter
+eqmest1=c(eqm1(x=m1[,1],bs_nl=truevalue[1]),
+          eqm1(x=m1[,2],bs_nl=truevalue[2]),
+          eqm1(x=m1[,3],bs_nl=truevalue[3]),
+          eqm1(x=m1[,4],bs_nl=truevalue[4]))
+
+
+# Table with the true values of the parameters and the average
+# Standard deviation and mean square error of the estimated parameters
+tab=data.frame(truevalue,mean=mest,sd=dest,eqm=eqmest)
+tab1=data.frame(truevalue,mean=mest1,sd=dest1,eqm=eqmest1)
+
+tab
+tab1
+```
+
+```{r, fig.align='center'}
+par(mfrow=c(2,2))
+hist(m[,1],prob=T);
+rug(m[,1])
+curve(expr = dnorm(x,mean=mean(m[,1]),sd=sd(m[,1])),add=T, col="red")
+hist(m[,2],prob=T);
+rug(m[,2])
+curve(expr = dnorm(x,mean=mean(m[,2]),sd=sd(m[,2])),add=T, col="red")
+hist(m[,3],prob=T);
+rug(m[,3])
+curve(expr = dnorm(x,mean=mean(m[,3]),sd=sd(m[,3])),add=T, col="red")
+hist(m[,4],prob=T);
+rug(m[,4])
+curve(expr = dnorm(x,mean=mean(m[,4]),sd=sd(m[,4])),add=T, col="red")
+```
+
+```{r, fig.align='center'}
+par(mfrow=c(2,2))
+hist(m1[,1],prob=T);
+rug(m1[,1])
+curve(expr = dnorm(x,mean=mean(m1[,1]),sd=sd(m1[,1])),add=T, col="red")
+hist(m1[,2],prob=T);
+rug(m1[,2])
+curve(expr = dnorm(x,mean=mean(m1[,2]),sd=sd(m1[,2])),add=T, col="red")
+hist(m1[,3],prob=T);
+rug(m1[,3])
+curve(expr = dnorm(x,mean=mean(m1[,3]),sd=sd(m1[,3])),add=T, col="red")
+hist(m1[,4],prob=T);
+rug(m1[,4])
+curve(expr = dnorm(x,mean=mean(m1[,4]),sd=sd(m1[,4])),add=T, col="red")
+
+```
+
+
+
 #Referências
 
-1-Z.W. Birnbaum & S.C. Saunders. A new family of life distribuitions. Journal of Applied Probability, 6 (1969), 319-327.
+1-Z.W. Birnbaum & S.C. Saunders. A new family of life distribuitions. Journal 
+of Applied Probability, 6 (1969), 319-327.
 
+2-B.S, Luis Enrique, Modelos Birnbaum-Saunders bivariados – Campinas, SP:
+[s.n.], 2014.
 
+3-S.N, Manoel Ferreira, Estimação e Modelagem com a distribuição Birnbaum-Saunders: Uma nova reparametrização - Recife, PE, 2010.
 
+4-Barros, M., Paula, G. A., Leiva, V. (2009). An R implementation for generalized
+Birnbaum-Saunders distributions. Computational Statistics and Data Analysis, 53(5),
+1511-1528.
 
+## Pensamento
 
+"Há três caminhos para o sucesso:
+
+1- Ensinar o que se sabe - Generosidade Mental
+
+2- Praticar o que se ensina - Coerência Ética
+
+3- Perguntar o que se ignora - Humildade Intelectual"
+
+    *Mario Sergio Cortella
 
