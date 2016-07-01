@@ -1,12 +1,19 @@
 ---
 title: "Introdução a Estimação e Modelagem no R com o Uso da Distribuição Birnbaum-Saunders"
-output: 
-  pdf_document: 
+author: "Fernando de Souza Bastos"
+Formação: Doutorando em Estatística - UFMG
+output:
+  pdf_document:
+    toc: yes
+  html_document:
     fig_caption: yes
     toc: yes
-author: Fernando de Souza Bastos
+Evento: Stat4good
 ---
 
+```{r,echo = FALSE}
+options(OutDec=",")
+```
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
@@ -16,7 +23,6 @@ knitr::opts_chunk$set(echo = TRUE)
 <p style="text-align: justify;">
 Neste post é utilizada a distribuição Birnbaum-Saunders para ilustrar alguns conceitos de métodos computacionais em Inferência Estatística.  Essa distribuição foi proposta por Birnbaum e Saunders (1969), no artigo intitulado __A new family of life distributions__ e é, comumente, considerado na modelagem de tempo de vida de materiais e equipamentos sujeitos a cargas dinâmicas através de modelos de dano acumulado. Sendo, amplamente, utilizada na área de engenharia, na indústria, em negócios, na análise de confiabilidade, na análise de sobrevivência, em ciências ambientais e ciências médicas e em diversas outras áreas, pois possui propriedades interessantes e uma relação próxima com a distribuição normal, o que a torna, do ponto de vista de aplicação, uma alternativa mais atraente para as bem conhecidas distribuições Weibull, log-logística, log-normal, gama e modelos inversos Gaussianos. 
 </p>
-
 <p style="text-align: justify;">
 Além do contexto inferencial, é discutido algumas observações sobre questões numéricas quando trabalha-se com a função de verossimilhança na perspectiva computacional fazendo uso do software `R`. 
 </p>
@@ -76,28 +82,43 @@ Note que com a mudança de alpha, mantendo beta fixo, há uma alteração na ass
 
 ```{r, fig.align='center',fig.cap='Função de Distribuição Acumulada'}
 t=seq(0,3,by=0.01)
-plot(t,acbs(t,0.1,1),main='T ~ Birnbaum-Saunders(shape, scale=1)',ylab='F(T<=t)',type='l')
+plot(t,acbs(t,0.1,1),main=expression(T%~%BS(alpha,beta==1)),ylab=expression(P(T<=t)==F(t)),xlab="",type='l')
 lines(t,acbs(t,0.3,1),col=2,lty=2, lwd=1)
 lines(t,acbs(t,0.5,1),col=3,lty=3, lwd=2)
 lines(t,acbs(t,0.75,1),col=4,lty=4, lwd=3)
 lines(t,acbs(t,1,1),col=5,lty=5, lwd=3)
 lines(t,acbs(t,1.5,1),col=6,lty=6, lwd=2)
-legend(2.3, 0.55, c("BS(t,0.1,1)","BS(t,0.3,1)","BS(t,0.5,1)","BS(t,0.75,1)","BS(t,1,1)",
-                    "BS(t,1.5,1)"), fill=1:6)
+legend(2.3, 0.55, c(expression(alpha==0.10), 
+                    expression(alpha==0.30),
+                    expression(alpha==0.50),
+                    expression(alpha==0.75),
+                    expression(alpha==1.00),
+                    expression(alpha==1.50)), 
+       col=1:6, 
+       lwd=c(1,1,2,3,3,2), 
+       lty=c(1,2,3,4,5,6))
 
 ```
 
 ```{r, fig.align='center',fig.cap='Função Densidade'}
 #
 t=seq(0,3,by=0.01)
-plot(t,bs(t,0.1,1),main='T ~ Birnbaum-Saunders(shape, scale=1)',ylab='Densidade',type='l')
+plot(t,bs(t,0.1,1),main=expression(T%~%BS(alpha,beta==1)),ylab='Densidade',xlab="",type='l')
 lines(t,bs(t,0.3,1),col=2,lty=2, lwd=1)
 lines(t,bs(t,0.5,1),col=3,lty=3, lwd=2)
 lines(t,bs(t,0.75,1),col=4,lty=4, lwd=3)
 lines(t,bs(t,1,1),col=5,lty=5, lwd=3)
 lines(t,bs(t,1.5,1),col=6,lty=6, lwd=2)
-legend(2.3, 4, c("BS(t,0.1,1)","BS(t,0.3,1)","BS(t,0.5,1)","BS(t,0.75,1)","BS(t,1,1)",
-                 "BS(t,1.5,1)"), fill=1:6)
+legend(2.3, 3, c(expression(alpha==0.10), 
+                    expression(alpha==0.30),
+                    expression(alpha==0.50),
+                    expression(alpha==0.75),
+                    expression(alpha==1.00),
+                    expression(alpha==1.50)), 
+       col=1:6, 
+       lwd=c(1,1,2,3,3,2), 
+       lty=c(1,2,3,4,5,6))
+
 ```
 
 <p style="text-align: justify;">
@@ -107,33 +128,44 @@ Enquanto que ao manter alpha fixo e mudar o beta há uma mudança na média e na
 ```{r, fig.align='center', fig.width=6.5,fig.cap='Distribuição Acumulada'}
 
 t=seq(0.2,3.5,by=0.01)
-plot(t,acbs(t,0.1,0.5),main='T~Birnbaum-Saunders(shape=0.1,scale)',ylab='F(T<=t)',type='l')
+plot(t,acbs(t,0.1,0.5),main=expression(T%~%BS(alpha==0.1,beta)),ylab=expression(P(T<=t)==F(t)),xlab="",type='l')
 lines(t,acbs(t,0.1,0.75),col=2,lty=2, lwd=1)
 lines(t,acbs(t,0.1,1),col=3,lty=3, lwd=2)
 lines(t,acbs(t,0.1,1.5),col=4,lty=4, lwd=3)
 lines(t,acbs(t,0.1,2),col=5,lty=5, lwd=3)
 lines(t,acbs(t,0.1,2.5),col=6,lty=6, lwd=2)
-legend(2.55, 0.55, c("BS(t,0.1,0.5)","BS(t,0.1,0.75)","BS(t,0.1,1)","BS(t,0.1,1.5)",
-                     "BS(t,0.1,2)","BS(t,0.1,2.5)"), fill=1:6)
+legend(2.7, 0.55, c(expression(beta==0.50), 
+                    expression(beta==0.75),
+                    expression(beta==1),
+                    expression(beta==1.5),
+                    expression(beta==2.00),
+                    expression(beta==2.50)), 
+       col=1:6, 
+       lwd=c(1,1,2,3,3,2), 
+       lty=c(1,2,3,4,5,6))
 ```
 
 ```{r, fig.align='center', fig.width=6.5,fig.cap='Função Densidade'}
 t=seq(0,3,by=0.01)
-plot(t,bs(t,0.1,0.5),main='T~Birnbaum-Saunders(shape=0.1,scale)',ylab='Densidade',type='l')
+plot(t,bs(t,0.1,0.5),main=expression(T%~%BS(alpha==0.1,beta)),ylab='Densidade',xlab="",type='l')
 lines(t,bs(t,0.1,0.75),col=2,lty=2, lwd=1)
 lines(t,bs(t,0.1,1),col=3,lty=3, lwd=2)
 lines(t,bs(t,0.1,1.5),col=4,lty=4, lwd=3)
 lines(t,bs(t,0.1,2),col=5,lty=5, lwd=3)
 lines(t,bs(t,0.1,2.5),col=6,lty=6, lwd=2)
-legend(2, 8, c("BS(t,0.1,0.5)","BS(t,0.1,0.75)","BS(t,0.1,1)","BS(t,0.1,1.5)",
-                 "BS(t,0.1,2)","BS(t,0.1,2.5)"), fill=1:6)
-
+legend(2, 8, c(expression(beta==0.50), 
+                    expression(beta==0.75),
+                    expression(beta==1),
+                    expression(beta==1.5),
+                    expression(beta==2),
+                    expression(beta==2.50)), 
+       col=1:6, 
+       lwd=c(1,1,2,3,3,2), 
+       lty=c(1,2,3,4,5,6))
 ```
 
 ##Observações:
 
-
-* A função de distribuição acumulada da $BS(\alpha,\beta)$ é identificável.
 * $F_{T}(\beta)=0.5,$ ou seja, $\beta$ é a mediana da $BS(\alpha,\beta)$
 * Se $T\sim BS(\alpha,\beta),$ então $$a>0,\ aT\sim BS(\alpha,a\beta)\ \textrm{e}\ T^{-1}\sim BS(\alpha,\beta^{-1})$$
 * A partir da FDA, fazendo $Z=\dfrac{1}{\alpha}\left(\sqrt{\frac{t}{\beta}}-\sqrt{\frac{\beta}{t}}\right)$ temos: 
@@ -151,7 +183,7 @@ $$CV(T)=\dfrac{\sqrt{5\alpha^{4}+4\alpha^{2}}}{\alpha^{2}+2}$$
 
 $$\mu_{3}=\dfrac{16\alpha^{2}(11\alpha^{2}+6)}{(5\alpha^{2}+4)^{3}},\ \mu_{4}=3+\dfrac{6\alpha^{2}(93\alpha^{2}+41)}{5+\alpha^{2}+4}$$
 
-#A Função de Verossimilhança
+#A Função Log de Verossimilhança
 
 Seja $T_{1},\ldots, T_{n}$ uma amostra aleatória de tamanho $n$ da distribuição $BS\left(\alpha,\beta\right)$.
 Então, o logaritmo da função de verossimilhança para $\theta=(\alpha,\beta)$, possui a seguinte forma:
@@ -175,7 +207,11 @@ Antes de apresentar a simulação de Monte Carlo para estimação dos parâmetro
 
 ```{r, fig.align='center', fig.height=4, fig.width=7, message=FALSE, warning=FALSE, fig.cap='Função de Velhossimilhança'}
 ########################################
+require(rgl) # Para fazer os gráficos com rotação
+require(colorRamps) # Para usar a palleta de cor do matlab
 require(plot3D)
+require(rglwidget)
+
 alpha=2
 beta=1
 n=1000
@@ -196,7 +232,9 @@ z <- outer(alpha,beta, f)
 ```
 
 ```{r, fig.align='center', fig.height=4, fig.width=7, message=FALSE, warning=FALSE, fig.cap='Função de Velhossimilhança'}
-persp3D(x=alpha, y=beta, z=z, contour=TRUE, facets=TRUE, curtain=F, phi=30,theta=0)
+persp3d(f,xlim=alpha, ylim=beta, contour=TRUE, col = matlab.like,
+        xlab = "Shape", ylab = "Scale", zlab = "Loglik")
+rglwidget()
 ```
 
 ```{r, fig.align='center', fig.height=4, fig.width=7, message=FALSE, warning=FALSE, fig.cap='Histograma da Função de Velhossimilhança'}
@@ -204,20 +242,10 @@ hist3D(x=alpha, y=beta, z=z, contour=TRUE, facets=TRUE, curtain=F, phi=-30,theta
 ```
 
 ```{r, fig.align='center', fig.height=4, fig.width=7, message=FALSE, warning=FALSE, fig.cap='Grágico de Contorno da Função de Velhossimilhança'}
-contour(x=alpha, y=beta, z=z,levels = pretty(c(-1780,-2000),20))
+image(x=alpha, y=beta,z,col = terrain.colors(500))
+contour(x=alpha, y=beta, z=z,add=TRUE,levels = pretty(c(-1780,-2000),20))
 points(x=c(2,1),pch=19)
-
-########################################
 ```
-
-#Simulação de Monte Carlo
-
-<p style="text-align: justify;">
-O método de Monte Carlo é um método de simulação estatística que utiliza 
-sequencias de números aleatórios para desenvolver simulações. Em outras 
-palavras, é visto como método numérico universal para resolver problemas por 
-meio de amostragem aleatória.
-</p>
 
 ##Possíveis problemas na estimação dos parâmetros
 
@@ -227,46 +255,45 @@ destaque:
 </p>
 
 <p style="text-align: justify;">
-Veja que apesar de `0.3-0.1=0.2` o R diz que isso não é verdade. Isso ocorre 
-porque nesta diferença o R arredonda o resultado, veja abaixo que se aumentamos 
-o número de dígitos a saída é um número próximo mas diferente de 2.
-</p>
-
-```{r}
-
-0.3-0.1==0.2
-isTRUE(0.3-0.1==0.2)
-
-print(0.3-0.1,digits=17)
-
-
-```
-
-<p style="text-align: justify;">
-Outro problema possível é aparecer números muito grandes na simulação de forma que o R entende que o mesmo é infinito e a simulação para de forma brusca. Veja o menor número positivo que pode ser representado pela máquina, o maior número e outros valores importantes:
+Outro problema possível é aparecer números muito grandes ou números negativos durante a estimação de forma que o R não consiga continuar o processo de otimização. Veja o menor número positivo que pode ser representado pela máquina, o maior número e outros valores importantes:
 </p>
 
 ```{r}
 .Machine
 ```
+<p style="text-align: justify;">
+Exemplo de um número menor que o epsilon da maquina.
+</p>
+
+```{r}
+0.3-0.1==0.2
+isTRUE(0.3-0.1==0.2)
+print(0.3-0.1,digits=17)
+```
 
 <p style="text-align: justify;">
-Para contornar esse problema, podemos fazer o seguinte truque:
+O método de otimização que uso (função 'optim' e 'nlimb' do 'R') são métodos irrestritos, como vários outros métodos de otimização implementados no R, como os parâmetros da Birnbaum-Saunders possuem suporte positivo uma modificação (reparametrização) pode ser útil. No meu script ao definir a função log de verossimilhança mudei alpha e beta para exp(lalpha) e exp(lbeta), respectivamente, onde lalpha=log(alpha) e lbeta=log(beta). Ao fazer esta mudança não altera-se em nada a função pois a substituição usa exp(log(alpha))=alpha e exp(log(beta))=beta. Essa modificação é um artifício para o R não ter que calcular log de números maiores que o maior valor possível (~exp(709)) ou calcular log de números negativos.
 </p>
 <p style="text-align: justify;">
-No exemplo específico da Birnbaum-Saunders ao definir a função log de verossimilhança mude alpha e beta para exp(lalpha) e exp(lbeta), respectivamente, onde lalpha=log(alpha) e lbeta=log(beta). Ao fazer esta mudança não altera-se em nada a função pois a substituição usa exp(log(alpha))=alpha e exp(log(beta))=beta, isso é um macete para o R não ter que calcular log de números maiores que o maior valor possível (~exp(709)).
-</p>
-<p style="text-align: justify;">
-Outra forma de resolver, caso o método de otimização funcione, mas aparece alguns 'Warnings' com valores NA, é manter alpha e beta e acrescentar na função optim o comando abaixo: 
+Caso o método de otimização funcione, mas apareça alguns 'Warnings' com valores NA, podemos manter alpha e beta e acrescentar na função optim o comando abaixo: 
 </p>
 `1-suppressWarnings(optim(start,fn=Loglik,method="BFGS",hessian=T)$par)`
 <p style="text-align: justify;">
 Neste caso escondemos os avisos. Os mesmos continuarão lá, porém ocultos, não é recomendado!
-Outra forma é caso na simulação apareça números negativos no argumento do log, podemos acrescentar o código:
+Caso na simulação apareça números negativos no argumento do log, podemos acrescentar também o código:
 </p>
 `if (any(c(t, beta, alpha, pi) < 0)) return(NA)`
 <p style="text-align: justify;">
 Vejamos como gerar valores aleatório com distribuição Birnbaum-Saunders e a estimação de alpha e beta usando uma simulação de Monte Carlo e as funções optim e nlimb.
+</p>
+
+#Simulação de Monte Carlo
+
+<p style="text-align: justify;">
+O método de Monte Carlo é um método de simulação estatística que utiliza 
+sequencias de números aleatórios para desenvolver simulações. Em outras 
+palavras, é visto como método numérico universal para resolver problemas por 
+meio de amostragem aleatória.
 </p>
 
 ```{r}
@@ -348,22 +375,22 @@ tab
 tab1
 ```
 
-```{r, fig.align='center', fig.height=3, fig.width=7, fig.cap='Histograma das estimativas dos parâmetros'}
+```{r, fig.align='center', fig.height=3, fig.width=7, fig.cap='Histograma das estimativas dos parâmetros usando a função optim'}
 par(mfrow=c(1,2))
-hist(m[,1],prob=T);
+hist(m[,1],prob=T,ylab="densidade",xlab="",main="");
 rug(m[,1])
 curve(expr = dnorm(x,mean=mean(m[,1]),sd=sd(m[,1])),add=T, col="red")
-hist(m[,2],prob=T);
+hist(m[,2],prob=T,ylab="densidade",xlab="",main="");
 rug(m[,2])
 curve(expr = dnorm(x,mean=mean(m[,2]),sd=sd(m[,2])),add=T, col="red")
 ```
 
-```{r, fig.align='center', fig.height=3, fig.width=7, fig.cap='Histograma das estimativas dos parâmetros'}
+```{r, fig.align='center', fig.height=3, fig.width=7, fig.cap='Histograma das estimativas dos parâmetros usando a função nlimb'}
 par(mfrow=c(1,2))
-hist(m1[,1],prob=T);
+hist(m1[,1],prob=T,ylab="densidade",xlab="",main="");
 rug(m1[,1])
 curve(expr = dnorm(x,mean=mean(m1[,1]),sd=sd(m1[,1])),add=T, col="red")
-hist(m1[,2],prob=T);
+hist(m1[,2],prob=T,ylab="densidade",xlab="",main="");
 rug(m1[,2])
 curve(expr = dnorm(x,mean=mean(m1[,2]),sd=sd(m1[,2])),add=T, col="red")
 
@@ -372,7 +399,7 @@ curve(expr = dnorm(x,mean=mean(m1[,2]),sd=sd(m1[,2])),add=T, col="red")
 #Uma Reparametrização Importante
 
 <p style="text-align: justify;">
-As vezes, reparametrizações são essenciais, pois facilitam o desenvolvimento analítico de algumas distribuições e também podem melhorar
+As vezes, reparametrizações são essenciais, pois facilitam o desenvolvimento analítico de algumas distribuições e também podem melhorar 
 a eficiência em simulações, em determinadas situações, como em regressão, quando a distribuição da variável resposta não possui a média como um de seus
 parâmetros podemos proceder uma reparametrização de forma a atender essa condição e poder ajustar a média da variável resposta. Exemplos de distribuições em
 que são realizadas reparametrizações com sucesso são: distribuição beta (ver Ferrari e Cribari-Neto 2004) e distribuição gaussiana inversa (ver Tweedie 1957).</p>
@@ -423,31 +450,50 @@ aleatória e com o aumento de beta há um aumento da assimetria e uma diminuiç�
 ```{r, fig.align='center',fig.cap='Função Densidade'}
 #
 t=seq(0.5,6,by=0.01)
-plot(t,bs(t,1,100),main='T ~ Birnbaum-Saunders(mu, phi=100)',ylab='Densidade',type='l')
+plot(t,bs(t,1,100),main=expression(T%~%BS(mu,phi==100)),ylab='Densidade',xlab="",type='l')
 lines(t,bs(t,1.5,100),col=2,lty=2, lwd=1)
 lines(t,bs(t,2,100),col=3,lty=3, lwd=2)
 lines(t,bs(t,2.5,100),col=4,lty=4, lwd=3)
 lines(t,bs(t,3,100),col=5,lty=5, lwd=3)
 lines(t,bs(t,3.5,100),col=6,lty=6, lwd=2)
-legend(4.3, 2.7, c("BS(t,1,100)","BS(t,1.5,100)","BS(t,2,100)","BS(t,2.5,100)",
-                   "BS(t,3,100)","BS(t,3.5,100)"), fill=1:6)
+legend(4.3,2.7, c(expression(mu==1), 
+                    expression(mu==1.5),
+                    expression(mu==2),
+                    expression(mu==2.5),
+                    expression(mu==3),
+                    expression(mu==3.5)), 
+       col=1:6, 
+       lwd=c(1,1,2,3,3,2), 
+       lty=c(1,2,3,4,5,6))
 ```
+
+main=expression(T%~%BS(alpha,beta==1)),ylab=expression(P(T<=t)==F(t)),xlab="",
+
+
+
+
 
 ```{r, fig.align='center',fig.cap='Função Densidade'}
 t=seq(0,4,by=0.01)
-plot(t,bs(t,1,2),ylim=c(0,2.8),main='T~Birnbaum-Saunders(mu=1, phi)',ylab='Densidade',type='l')
+plot(t,bs(t,1,2),ylim=c(0,2.8),main=expression(T%~%BS(mu==1,phi)),ylab='Densidade',xlab="",type='l')
 lines(t,bs(t,1,5),col=2,lty=2, lwd=1)
 lines(t,bs(t,1,10),col=3,lty=3, lwd=2)
 lines(t,bs(t,1,25),col=4,lty=4, lwd=3)
 lines(t,bs(t,1,50),col=5,lty=5, lwd=3)
 lines(t,bs(t,1,100),col=6,lty=6, lwd=2)
-legend(2.5, 2.5, 
-       c("BS(t,1,2)","BS(t,1,5)","BS(t,1,10)","BS(t,1,25)",
-         "BS(t,1,50)","BS(t,1,100)"), fill=1:6)
+legend(2.5, 2.5, c(expression(phi==2), 
+                    expression(phi==5),
+                    expression(phi==10),
+                    expression(phi==25),
+                    expression(phi==50),
+                    expression(phi==100)), 
+       col=1:6, 
+       lwd=c(1,1,2,3,3,2), 
+       lty=c(1,2,3,4,5,6))
 ```
 
 <p style="text-align: justify;">
-Ao manter mu fixo e aumentar phi a variância de T (Var(T)) tende a zero.
+Ao manter $\mu$ fixo e aumentar $\phi$ a variância de T tende a zero.
 </p>
 
 ```{r, fig.align='center',fig.cap="Variância de T"}
@@ -458,18 +504,25 @@ V=function(mu,phi){
 
 # 
 phi=seq(0.001,100,by=0.01)
-plot(phi,V(0.6,phi),ylim=c(0,2.8),main='T~Birnbaum-Saunders(mu=1,phi)',ylab='Var(T)',type='l')
+plot(phi,V(0.6,phi),ylim=c(0,2.8),main=expression(T%~%BS(mu==1,phi)),ylab='Var(T)',xlab="",type='l')
 lines(phi,V(1,phi),col=2,lty=2, lwd=1)
 lines(phi,V(1.5,phi),col=3,lty=3, lwd=2)
 lines(phi,V(2,phi),col=4,lty=4, lwd=3)
 lines(phi,V(2.5,phi),col=5,lty=5, lwd=3)
 lines(phi,V(3,phi),col=6,lty=6, lwd=2)
-legend(60, 2.5, c("Var(T;0.6,phi)","Var(T;1,phi)","Var(T;1.5,phi)",
-                  "Var(T;2,phi)","Var(T;2.5,phi)","Var(T;3,phi)"), fill=1:6)
+legend(60, 2.5, c(expression(alpha==0.6), 
+                    expression(alpha==1),
+                    expression(alpha==1.5),
+                    expression(alpha==2),
+                    expression(alpha==2.5),
+                    expression(alpha==3)), 
+       col=1:6, 
+       lwd=c(1,1,2,3,3,2), 
+       lty=c(1,2,3,4,5,6))
 
 ```
 
-##Função Log de Verossimilhança da $BS(\mu,\phi)$
+##Nova Função Log de Verossimilhança
 
 $$l(\mu,\phi;\textbf{T})=\dfrac{n\phi}{2}+\dfrac{n}{2}\log{(\phi+1)}-\dfrac{3}{2}\sum_{i=1}^{n}\log{t_{i}}-n\log{(4\sqrt{\pi\mu})}+\sum_{i=1}^{n}\log{\left[t_{i}+\dfrac{\phi\mu}{\phi+1}\right]}-\dfrac{\phi}{4}\sum_{i=1}^{n}\left[\dfrac{t_{i}(\phi+1)}{\phi\mu}+\dfrac{\phi\mu}{t_{i}(\phi+1)}\right]$$
 
@@ -579,22 +632,22 @@ tab1
 ```
 
 
-```{r, fig.align='center', fig.height=3, fig.width=7, fig.cap='Histograma das estimativas dos parâmetros'}
+```{r, fig.align='center', fig.height=3, fig.width=7, fig.cap='Histograma das estimativas dos parâmetros obtidas com a função optim'}
 par(mfrow=c(1,2))
-hist(m[,1],prob=T);
+hist(m[,1],prob=T,ylab="densidade",xlab="",main="");
 rug(m[,1])
 curve(expr = dnorm(x,mean=mean(m[,1]),sd=sd(m[,1])),add=T, col="red")
-hist(m[,2],prob=T);
+hist(m[,2],prob=T,ylab="densidade",xlab="",main="");
 rug(m[,2])
 curve(expr = dnorm(x,mean=mean(m[,2]),sd=sd(m[,2])),add=T, col="red")
 ```
 
-```{r, fig.align='center', fig.height=3, fig.width=7, fig.cap='Histograma das estimativas dos parâmetros'}
+```{r, fig.align='center', fig.height=3, fig.width=7, fig.cap='Histograma das estimativas dos parâmetros obtidas com a função nlimb'}
 par(mfrow=c(1,2))
-hist(m1[,1],prob=T);
+hist(m1[,1],prob=T,ylab="densidade",xlab="",main="");
 rug(m1[,1])
 curve(expr = dnorm(x,mean=mean(m1[,1]),sd=sd(m1[,1])),add=T, col="red")
-hist(m1[,2],prob=T);
+hist(m1[,2],prob=T,ylab="densidade",xlab="",main="");
 rug(m1[,2])
 curve(expr = dnorm(x,mean=mean(m1[,2]),sd=sd(m1[,2])),add=T, col="red")
 
@@ -606,7 +659,7 @@ curve(expr = dnorm(x,mean=mean(m1[,2]),sd=sd(m1[,2])),add=T, col="red")
 Agora, vamos criar uma estrutura de regressão para $\mu$ e $\phi,$ de tal forma que $g(\mu)=\beta_{0}+\beta_{1}X$ e $h(\phi)=\alpha_{0}+\alpha_{1}Z$
 </p>
 ```{r, fig.align='center', fig.cap='Histograma das estimativas dos parâmetros'}
-N=100
+N=1000
 #m e m1 são as matrizes que receberão as estimativas no final do processo de 
 #estimação
 m=matrix(ncol=4,nrow=N)
@@ -712,34 +765,36 @@ tab1=data.frame(truevalue,mean=mest1,sd=dest1,eqm=eqmest1)
 
 tab
 tab1
+```
 
+```{r, fig.align='center', fig.cap='Histograma das estimativas dos parâmetros obtidas com a função optim'}
 par(mfrow=c(2,2))
-hist(m[,1],prob=T);
+hist(m[,1],prob=T,ylab="densidade",xlab="",main="");
 rug(m[,1])
 curve(expr = dnorm(x,mean=mean(m[,1]),sd=sd(m[,1])),add=T, col="red")
-hist(m[,2],prob=T);
+hist(m[,2],prob=T,ylab="densidade",xlab="",main="");
 rug(m[,2])
 curve(expr = dnorm(x,mean=mean(m[,2]),sd=sd(m[,2])),add=T, col="red")
-hist(m[,3],prob=T);
+hist(m[,3],prob=T,ylab="densidade",xlab="",main="");
 rug(m[,3])
 curve(expr = dnorm(x,mean=mean(m[,3]),sd=sd(m[,3])),add=T, col="red")
-hist(m[,4],prob=T);
+hist(m[,4],prob=T,ylab="densidade",xlab="",main="");
 rug(m[,4])
 curve(expr = dnorm(x,mean=mean(m[,4]),sd=sd(m[,4])),add=T, col="red")
 ```
 
-```{r, fig.align='center', fig.cap='Histograma das estimativas dos parâmetros'}
+```{r, fig.align='center', fig.cap='Histograma das estimativas dos parâmetros obtidas com a função optim'}
 par(mfrow=c(2,2))
-hist(m1[,1],prob=T);
+hist(m1[,1],prob=T,ylab="densidade",xlab="",main="");
 rug(m1[,1])
 curve(expr = dnorm(x,mean=mean(m1[,1]),sd=sd(m1[,1])),add=T, col="red")
-hist(m1[,2],prob=T);
+hist(m1[,2],prob=T,ylab="densidade",xlab="",main="");
 rug(m1[,2])
 curve(expr = dnorm(x,mean=mean(m1[,2]),sd=sd(m1[,2])),add=T, col="red")
-hist(m1[,3],prob=T);
+hist(m1[,3],prob=T,ylab="densidade",xlab="",main="");
 rug(m1[,3])
 curve(expr = dnorm(x,mean=mean(m1[,3]),sd=sd(m1[,3])),add=T, col="red")
-hist(m1[,4],prob=T);
+hist(m1[,4],prob=T,ylab="densidade",xlab="",main="");
 rug(m1[,4])
 curve(expr = dnorm(x,mean=mean(m1[,4]),sd=sd(m1[,4])),add=T, col="red")
 
