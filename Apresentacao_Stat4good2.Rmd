@@ -4,9 +4,7 @@ output:
   html_document: 
     fig_caption: yes
     toc: yes
-author: Fernando de Souza Bastos
-Formação: Doutorando em Estatística - UFMG
-Evento: Stat4good
+author: Fernando de Souza Bastos - Doutorando em Estatística (UFMG)
 ---
 
 ```{r,echo = FALSE}
