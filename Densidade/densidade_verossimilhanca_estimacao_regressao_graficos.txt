@@ -1,0 +1,478 @@
+rm(list=ls())
+cat("\014")
+par(mfrow=c(1,1))
+
+###########################################################################
+###                                                                     ###
+##                 Gráficos da Densidade BS(alpha,beta)                  ##
+###                     parametrização original                         ###
+###########################################################################
+
+#Função densidade da Birnbaum-Saunders com parâmetros de forma, alpha, e de escala beta.
+#Shape=alpha, scala=beta
+
+bs<-function(t,alpha,beta){
+  f<-((t+beta)/(2*alpha*sqrt(2*pi*beta)))*(t^(-3/2))*exp((-1/(2*alpha^2))*((t/beta)+(beta/t)-2))
+  return(f)
+}
+
+alpha=10
+beta=2
+integrand <- function(t){((t+beta)/(2*alpha*sqrt(2*pi*beta)))*(t^(-3/2))*exp((-1/(2*alpha^2))*((t/beta)+(beta/t)-2))}
+integrate(integrand, lower = 0, upper = Inf)
+
+#Note que com a mudança de alpha, mantendo beta fixo, há uma alteração na assimetria do gráfico
+x=seq(0,3,by=0.01)
+ plot(x,bs(x,0.1,1),main='X ~ Birnbaum-Saunders(shape, scale=1)',ylab='Densidade',type='l')
+lines(x,bs(x,0.3,1),col=2,lty=2, lwd=1)
+lines(x,bs(x,0.5,1),col=3,lty=3, lwd=2)
+lines(x,bs(x,0.75,1),col=4,lty=4, lwd=3)
+lines(x,bs(x,1,1),col=5,lty=5, lwd=3)
+lines(x,bs(x,1.5,1),col=6,lty=6, lwd=2)
+legend(2.3, 4, c("BS(x,0.1,1)","BS(x,0.3,1)","BS(x,0.5,1)","BS(x,0.75,1)","BS(x,1,1)","BS(x,1.5,1)"), fill=1:6)
+
+#Enquanto que ao manter alpha fixo e mudar o beta há uma mudança na média e na variança da variável aleatória
+#COm o aumento de beta há um aumento da média e da variança
+x=seq(0,3,by=0.01)
+plot(x,bs(x,0.1,0.5),main='X ~ Birnbaum-Saunders(shape=0.1, scale)',ylab='Densidade',type='l')
+lines(x,bs(x,0.1,0.75),col=2,lty=2, lwd=1)
+lines(x,bs(x,0.1,1),col=3,lty=3, lwd=2)
+lines(x,bs(x,0.1,1.5),col=4,lty=4, lwd=3)
+lines(x,bs(x,0.1,2),col=5,lty=5, lwd=3)
+lines(x,bs(x,0.1,2.5),col=6,lty=6, lwd=2)
+legend(2.3, 8, c("BS(x,0.1,5)","BS(x,0.1,0.75)","BS(x,0.1,1)","BS(x,0.1,1.5)","BS(x,0.1,2)","BS(x,0.1,2.5)"), fill=1:6)
+
+##############################################################################
+###                                                                        ###
+##           Geração de valores e estimação de parâmetros                   ##
+###                            BS(alpha,beta)                              ###  
+##                                                                          ##
+##############################################################################
+
+#geração de valores de uma distribuição Birnbaum-Saunders(alpha,beta)
+
+#Observe que dentro da função log de verossimilhança foi usado a exp(lalpha) e exp(lbeta)
+#onde lalpha=log(alpha) e lbeta=log(beta), isso foi feito para não existir problemas na otimização
+#feita pela função optim que sem esses argumentos desta forma, utilizando alpha e beta, dá um erro
+#pois as vezes considera log de números negativos. Ao fazer esta mudança não altera-se em nada a
+#função pois a substituição usa exp(log(alpha))=alpha e exp(log(beta))=beta, isso é um macete
+#para o R não acusar erro.
+#Outra forma de resolver seria manter alpha e beta e acrescentar a função optim o comando 1, abaixo:
+#Neste caso vou esconder os avisos. Eles continuarão lá, mas ocultos:
+#1-suppressWarnings(optim(start,fn=Loglik,method="BFGS",hessian=T)$par)
+#Outra forma é acrescentar anter do log de verossimilhança o código:
+#if (any(c(t, beta, alpha, pi) < 0)) return(NA)
+
+
+n<-100
+z<-rnorm(n,0,1)
+#Gerando uma variável aleatória t com distribuição Birnbaum-Saunders(alpha,beta)
+alpha=1
+beta=2
+t<-cbind(beta*((alpha*z/2)+sqrt((alpha*z/2)^2+1))^2)
+remove(alpha,beta)  
+
+N=1000
+M=matrix(nrow=N,ncol=2)
+for(i in 1:N){
+
+Loglik<-function(par,dados){
+  lalpha=par[1]
+  lbeta=par[2]
+  t<-dados
+  ll<-sum(log(t+exp(lbeta)))-n*log(2*exp(lalpha))-(n/2)*(log(2*pi*exp(lbeta)))-(3/2)*sum(log(t))-((1/(2*exp(lalpha)^2))*sum((t/exp(lbeta))+(exp(lbeta)/t)-2))
+  return(-ll)
+}
+
+#Utilizando a verossimilhança e a função optim para estimar os parâmetros alpha e beta que deram
+#origem as observações t observadas. Note que foi utilizado o log dos valores de chutes iniciais
+
+lalpha_0=log(2)
+lbeta_0=log(2)
+start=c(lalpha_0,lbeta_0)
+
+M[i,]=exp(optim(start,fn=Loglik,method="BFGS",dados=t,hessian=T)$par)
+#M[i,]=exp(nlminb(start,Loglik,dados=t)$par)
+
+}
+mean=colMeans(M)
+mean
+
+##############################################################################
+###                                                                        ###
+##                 Gráficos da função log de verossimilhança                ##
+###                            BS(alpha,beta)                              ###  
+##                                                                          ##
+##############################################################################
+
+
+
+#agora vou plotar o gráfico da log de verossimilhança e visualizar o plot dos contornos/isovalores e
+#o mapa de cores
+
+#Neste caso posso considerar a log de verossimilhança sem o uso de artificíos para alpha e beta
+#Log de Verossimilhança
+LogLik<-function(par,dados){
+  alpha=par[1]
+  beta=par[2]
+  ll<-sum(log(t+beta))-n*log(2*alpha)-(n/2)*(log(2*pi*beta))-(3/2)*sum(log(t))-((1/(2*alpha^2))*sum((t/beta)+(beta/t)-2))
+  return(ll)
+}
+
+alpha=mean[1]
+beta=mean[2]
+pars.MV<-c(alpha,beta)
+
+#criamos uma sequência adequada de pares de valores de (alpha,beta) e calculamos l(alpha,beta) 
+#para cada um dos pares.
+
+par.vals<-expand.grid(alpha= seq(0.5, 3,l=100),beta=seq(0.5,8,l=100)) 
+dim(par.vals)
+head(par.vals)
+
+par.vals$logL<-apply(par.vals, 1, LogLik, dados = t) 
+head(par.vals)
+tail(par.vals)
+
+#Note na sintaxe acima que a função apply aplica a função logveroN a cada par de valores 
+#em cada linha de par.vals. Ao final o objeto |par.vals| contém na terceira coluna os valores 
+#da log-verossimilhança correspondentes as valores dos parâmetros dados na primeira e segunda 
+#colunas.
+
+#superfície 3D gerada pela função persp()
+with(par.vals, persp(unique(alpha), unique(beta), matrix(logL, 
+ncol = length(unique(beta))),xlab = expression(alpha), 
+ylab = expression(beta), zlab = expression(l(alpha,beta)), theta = 0, phi = 0,col = "lightblue")) 
+
+# repeat{
+#   for (i in 1:360) {
+#     persp(x, y, z, theta = i, phi = 30, expand = 0.5, col = "lightblue")
+#     }
+# }
+
+#help(persp)
+#mapa de curvas de isovalores obtido com image()
+with(par.vals,contour(unique(alpha),unique(beta), matrix(logL, ncol=length(unique(beta))),xlab = expression(alpha), ylab = expression(beta), nlev = 80)) 
+points(pars.MV[1], pars.MV[2], pch = 4, cex = 1.5) 
+
+#mapa de cores correspondentes aos valores gerado por image()
+with(par.vals, image(unique(alpha), unique(beta), matrix(logL, ncol = length(unique(beta))),xlab = expression(alpha), ylab = expression(beta), col = gray(seq(0,1, length = 30)))) 
+points(pars.MV[1], pars.MV[2], pch = 4, cex = 3)
+
+#Para obtenção da função foi necessário especificar faixas de valores para alpha e beta. 
+#A definição desta faixa foi feita após várias tentativas pois depende do problema, em especial
+#do número e variabilidade dos dados.
+#as funções gráficas utilizadas requerem: dois vetores de tamanhos n1 e n2 com os valores dos 
+#argumentos da função e os valores da função em uma matrix de dimensão n1 × n2. Por isto usamos 
+#unique() para extrair os valores dos argumentos, sem repeti-los e matrix() para os valores da 
+#função.
+#na função perp() as argumentos theta e phi são utilizados para rotacionar o gráfico a fim de 
+#se obter uma melhor visualização.
+#o valor das estimativas de máxima verossimilhança são indicados por x nos dois últimos gráficos. 
+#Neste caso eles foram fixados no objeto pars.MV, mas eles podem ser obtidos analiticamente. 
+
+
+###########################################################################
+###                                                                     ###
+##                 Gráficos da Densidade BS(mu,phi)                      ##
+###                      nova parametrização                            ###
+###########################################################################
+
+rm(list=ls())
+cat("\014")
+
+#Para criar uma estrutura de regressão é interessante que se faça uma reparametrização
+#de forma que E(T)=mu, para que façamos a modelagem da média da distribuição. Assim,
+#considere:
+
+#alpha=sqrt(2/phi) e beta=(phi*mu)/(phi+1) \rightarrow phi=(2/alpha^2) e mu=beta*(1+((alpha^2)/2))
+#phi>0 e mu>0
+
+#A nova densidade é:
+
+bs<-function(t,mu,phi){
+  fdp=((exp(phi/2)*sqrt(phi+1))/(4*sqrt(pi*mu)*t^(3/2)))*(t+((phi*mu)/(phi+1)))*exp((-phi/4)*((t*(phi+1)/(phi*mu))+(phi*mu/(t*(phi+1)))))
+  return(fdp)
+}
+
+#Teste para ver se a integral da densidade é igual a 1.
+mu=1
+phi=2
+integrand <- function(t){((exp(phi/2)*sqrt(phi+1))/(4*sqrt(pi*mu)*t^(3/2)))*(t+((phi*mu)/(phi+1)))*exp((-phi/4)*((t*(phi+1)/(phi*mu))+(phi*mu/(t*(phi+1)))))}
+integrate(integrand, lower = 0, upper = Inf)
+
+#Note que com a mudança de mu, mantendo phi fixo, há uma alteração na média e na variança da variável aleatória
+#COm o aumento de beta há um aumento da média e da variança
+x=seq(0.5,6,by=0.01)
+plot(x,bs(x,1,100),main='X ~ Birnbaum-Saunders(mu, phi=1)',ylab='Densidade',type='l')
+lines(x,bs(x,1.5,100),col=2,lty=2, lwd=1)
+lines(x,bs(x,2,100),col=3,lty=3, lwd=2)
+lines(x,bs(x,2.5,100),col=4,lty=4, lwd=3)
+lines(x,bs(x,3,100),col=5,lty=5, lwd=3)
+lines(x,bs(x,3.5,100),col=6,lty=6, lwd=2)
+legend(4.3, 2.7, c("BS(x,1,100)","BS(x,1.5,100)","BS(x,2,100)","BS(x,2.5,100)","BS(x,3,100)","BS(x,3.5,1)"), fill=1:6)
+
+#Enquanto que ao manter mu fixo e mudar o phi há uma mudança na assimetria do gráfico
+x=seq(0,4,by=0.01)
+plot(x,bs(x,1,2),ylim = c(0,2.8),main='X ~ Birnbaum-Saunders(mu=1, phi)',ylab='Densidade',type='l')
+lines(x,bs(x,1,5),col=2,lty=2, lwd=1)
+lines(x,bs(x,1,10),col=3,lty=3, lwd=2)
+lines(x,bs(x,1,25),col=4,lty=4, lwd=3)
+lines(x,bs(x,1,50),col=5,lty=5, lwd=3)
+lines(x,bs(x,1,100),col=6,lty=6, lwd=2)
+legend(2.5, 2.5, c("BS(x,1,2)","BS(x,1,5)","BS(x,1,10)","BS(x,1,25)","BS(x,1,50)","BS(x,1,100)"), fill=1:6)
+
+##############################################################################
+###                                                                        ###
+##    Criando uma estrutura de regressão do tipo beta0+beta1*X para mu      ##
+###                            BS(mu,phi)                                  ###  
+##                                                                          ##
+##############################################################################
+rm(list=ls())
+cat("\014")
+
+N=1000
+#m,m1,m2 e m3 são as matrizes que receberão as estimativas no final do processo de 
+#estimação
+m=matrix(ncol=2,nrow=N)
+m1=matrix(ncol=2,nrow=N)
+#Valores iniciais dos parâmetros usados para gerar t
+#Ou seja, Valor verdadeiro dos parâmetros
+beta0=20
+beta1=1
+truevalue=c(beta0,beta1)
+#Tamanho das amostras
+n=100
+#Vetor de parâmetros
+beta=matrix(c(beta0,beta1),nrow=2,ncol=1)
+#Vetor de 1's
+const1 <- rep(1,n);
+const <- cbind(const1);
+#Vetor de cováriavel com distribuição unif(0,1)
+X1=matrix(runif(n, 0, 1),nrow=n,ncol=1)
+#Matriz de covariáveis
+X <-matrix(c(const,X1),nrow=n,ncol=ncol(X1)+1)
+#Número de colunas de X
+p=ncol(X)
+#Vetor de médias
+mu=exp(X%*%beta)
+
+#Gerando uma variável aleatória t com distribuição Birnbaum-Saunders(mu,phi)
+phi=2
+remove(beta,beta0,beta1)
+#Monte Carlo para estimação dos parâmetros beta0, beta1 e beta2
+
+for (i in 1:N){
+  #set.seed(123)  
+z<-cbind(rnorm(n,0,1))
+t<-((phi*mu)/(phi+1))*((z/sqrt(2*phi))+(sqrt((z/sqrt(2*phi))^2+1)))^2
+
+Loglik<-function(beta,dados){
+  p=ncol(X)
+  mu=exp(X%*%beta[1:p])
+  phi=phi
+  lv=sum((phi/2)-(3/2)*log(t)+(1/2)*log(phi+1)-log(4*sqrt(pi*mu))+log(t+(phi*mu/(phi+1)))-(phi/4)*((t*(phi+1)/(phi*mu))+(phi*mu/(t*(phi+1)))))
+  #lv=sum(log(((exp(phi/2)*sqrt(phi+1))/(4*sqrt(pi*mu)*t^(3/2)))*(t+((phi*mu)/(phi+1)))*exp((-phi/4)*((t*(phi+1)/(phi*mu))+(phi*mu/(t*(phi+1)))))))
+  return(-lv)
+}
+#Chute inicial para as funções de estimação
+start=c(1,2)
+
+#Estimation with function optim
+bs_op=optim(start,Loglik,method="BFGS",dados=t,hessian = T) 
+m[i,]=bs_op$par
+bs_nl=nlminb(start, Loglik)
+m1[i,]=bs_nl$par
+}
+mest=colMeans(m)
+mest1=colMeans(m1)
+
+#calculating the standard deviation of each column of the array of parameters m
+dest=apply(m,2,sd)
+dest1=apply(m1,2,sd)
+
+#root mean square error in the calculation of each column of the array of parameters m in relation to the true value of the parameter
+eqm=function(x,bs_op){ 
+  k=length(x)
+  sqrt(sum(((x-bs_op)^2))/k)}
+
+eqm1=function(x,bs_nl){ 
+  k=length(x)
+  sqrt(sum(((x-bs_nl)^2))/k)}
+
+#Estimated mean squared error of each parameter 
+
+eqmest=c(eqm(x=m[,1],bs_op=truevalue[1]),
+         eqm(x=m[,2],bs_op=truevalue[2]))
+
+#Estimated mean squared error of each parameter
+eqmest1=c(eqm1(x=m1[,1],bs_nl=truevalue[1]),
+          eqm1(x=m1[,2],bs_nl=truevalue[2]))
+
+
+# Table with the true values of the parameters and the average
+# Standard deviation and mean square error of the estimated parameters
+tab=data.frame(truevalue,mean=mest,sd=dest,eqm=eqmest)
+tab1=data.frame(truevalue,mean=mest1,sd=dest1,eqm=eqmest1)
+
+tab
+tab1
+
+
+par(mfrow=c(2,2))
+hist(m[,1],prob=T);
+rug(m[,1])
+curve(expr = dnorm(x,mean=mean(m[,1]),sd=sd(m[,1])),add=T, col="red")
+hist(m[,2],prob=T);
+rug(m[,2])
+curve(expr = dnorm(x,mean=mean(m[,2]),sd=sd(m[,2])),add=T, col="red")
+hist(m1[,1],prob=T);
+rug(m1[,1])
+curve(expr = dnorm(x,mean=mean(m1[,1]),sd=sd(m1[,1])),add=T, col="red")
+hist(m1[,2],prob=T);
+rug(m1[,2])
+curve(expr = dnorm(x,mean=mean(m1[,2]),sd=sd(m1[,2])),add=T, col="red")
+
+##############################################################################
+###                                                                        ###
+##    Criando uma estrutura de regressão do tipo beta0+beta1*X para mu      ##
+###                     e alpha0+alpha1*Z para phi                          ##
+##                             BS(mu,phi)                                  ###  
+##                                                                          ##
+##############################################################################
+rm(list=ls())
+cat("\014")
+
+N=100
+#m e m1 são as matrizes que receberão as estimativas no final do processo de 
+#estimação
+m=matrix(ncol=4,nrow=N)
+m1=matrix(ncol=4,nrow=N)
+#Valores iniciais dos parâmetros usados para gerar t
+#Ou seja, Valor verdadeiro dos parâmetros
+beta0=2
+beta1=-1
+alpha0=3
+alpha1=1
+truevalue=c(beta0,beta1,alpha0,alpha1)
+#Tamanho das amostras
+n=100
+#Vetor de parâmetros
+beta=matrix(c(beta0,beta1),nrow=2,ncol=1)
+alpha=matrix(c(alpha0,alpha1),nrow=2,ncol=1)
+#Vetor de 1's
+const1 <- rep(1,n);
+const <- cbind(const1);
+#Vetor de cováriavel com distribuição unif(0,1)
+X1=matrix(runif(n, 0, 1),nrow=n,ncol=1)
+Z1=matrix(runif(n, 0, 1),nrow=n,ncol=1)
+#Matrizes de covariáveis
+X <-matrix(c(const,X1),nrow=n,ncol=ncol(X1)+1)
+Z <-matrix(c(const,Z1),nrow=n,ncol=ncol(Z1)+1)
+#Número de colunas de X e Z
+p=ncol(X)
+q=ncol(Z)
+#Vetor de médias
+mu=exp(X%*%beta)
+#Vetor de dispersão
+phi=exp(Z%*%alpha)
+
+#Gerando uma variável aleatória t com distribuição Birnbaum-Saunders(mu,phi)
+remove(beta,beta0,beta1,alpha,alpha0,alpha1)
+#Monte Carlo para estimação dos parâmetros beta0, beta1 e beta2
+
+for (i in 1:N){
+#set.seed(123)  
+z<-cbind(rnorm(n,0,1))
+t<-((phi*mu)/(phi+1))*((z/sqrt(2*phi))+(sqrt((z/sqrt(2*phi))^2+1)))^2
+
+
+#Um motivo de erro comum na função abaixo é esquecer o parentêses dentro do colchete
+#de theta[(p+1):(p+q)]  
+Loglik<-function(theta,dados){
+  p=ncol(X)
+  q=ncol(Z)
+  beta=theta[1:p]
+  alpha=theta[(p+1):(p+q)]
+  mu=exp(X%*%beta)
+  phi=exp(Z%*%alpha)
+  lv=sum((phi/2)-(3/2)*log(t)+(1/2)*log(phi+1)-log(4*sqrt(pi*mu))+log(t+(phi*mu/(phi+1)))-(phi/4)*((t*(phi+1)/(phi*mu))+(phi*mu/(t*(phi+1)))))
+  #lv=sum(log(((exp(phi/2)*sqrt(phi+1))/(4*sqrt(pi*mu)*t^(3/2)))*(t+((phi*mu)/(phi+1)))*exp((-phi/4)*((t*(phi+1)/(phi*mu))+(phi*mu/(t*(phi+1)))))))
+  return(-lv)
+}
+#Chute inicial para as funções de estimação
+start=cbind(5,3,1,-1)
+  
+#alpha=c(1,2)
+#beta=c(2,1)
+  
+#Estimation with function optim
+bs_op=optim(start,Loglik,method="BFGS",dados=t,hessian = T) 
+m[i,]=bs_op$par
+bs_nl=nlminb(start, Loglik,dados=t)
+m1[i,]=bs_nl$par
+}
+mest=colMeans(m)
+mest1=colMeans(m1)
+
+#calculating the standard deviation of each column of the array of parameters m
+dest=apply(m,2,sd)
+dest1=apply(m1,2,sd)
+
+#root mean square error in the calculation of each column of the array of parameters m in relation to the true value of the parameter
+eqm=function(x,bs_op){ 
+  k=length(x)
+  sqrt(sum(((x-bs_op)^2))/k)}
+
+eqm1=function(x,bs_nl){ 
+  k=length(x)
+  sqrt(sum(((x-bs_nl)^2))/k)}
+
+#Estimated mean squared error of each parameter 
+
+eqmest=c(eqm(x=m[,1],bs_op=truevalue[1]),
+         eqm(x=m[,2],bs_op=truevalue[2]),
+         eqm(x=m[,3],bs_op=truevalue[3]),
+         eqm(x=m[,4],bs_op=truevalue[4]))
+
+#Estimated mean squared error of each parameter
+eqmest1=c(eqm1(x=m1[,1],bs_nl=truevalue[1]),
+          eqm1(x=m1[,2],bs_nl=truevalue[2]),
+          eqm1(x=m1[,3],bs_nl=truevalue[3]),
+          eqm1(x=m1[,4],bs_nl=truevalue[4]))
+
+
+# Table with the true values of the parameters and the average
+# Standard deviation and mean square error of the estimated parameters
+tab=data.frame(truevalue,mean=mest,sd=dest,eqm=eqmest)
+tab1=data.frame(truevalue,mean=mest1,sd=dest1,eqm=eqmest1)
+
+tab
+tab1
+
+par(mfrow=c(2,2))
+hist(m[,1],prob=T);
+rug(m[,1])
+curve(expr = dnorm(x,mean=mean(m[,1]),sd=sd(m[,1])),add=T, col="red")
+hist(m[,2],prob=T);
+rug(m[,2])
+curve(expr = dnorm(x,mean=mean(m[,2]),sd=sd(m[,2])),add=T, col="red")
+hist(m[,3],prob=T);
+rug(m[,3])
+curve(expr = dnorm(x,mean=mean(m[,3]),sd=sd(m[,3])),add=T, col="red")
+hist(m[,4],prob=T);
+rug(m[,4])
+curve(expr = dnorm(x,mean=mean(m[,4]),sd=sd(m[,4])),add=T, col="red")
+
+hist(m1[,1],prob=T);
+rug(m1[,1])
+curve(expr = dnorm(x,mean=mean(m1[,1]),sd=sd(m1[,1])),add=T, col="red")
+hist(m1[,2],prob=T);
+rug(m1[,2])
+curve(expr = dnorm(x,mean=mean(m1[,2]),sd=sd(m1[,2])),add=T, col="red")
+hist(m1[,3],prob=T);
+rug(m1[,3])
+curve(expr = dnorm(x,mean=mean(m1[,3]),sd=sd(m1[,3])),add=T, col="red")
+hist(m1[,4],prob=T);
+rug(m1[,4])
+curve(expr = dnorm(x,mean=mean(m1[,4]),sd=sd(m1[,4])),add=T, col="red")

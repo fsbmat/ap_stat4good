@@ -5,7 +5,6 @@ output:
     fig_caption: yes
     toc: yes
 author: Fernando de Souza Bastos - Doutorando em Estatística (UFMG)
-author2: Rumenick Pereira - Doutorando em Estatística (UFMG)
 ---
 
 ```{r,echo = FALSE}
